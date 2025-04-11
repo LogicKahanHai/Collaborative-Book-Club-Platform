@@ -25,14 +25,15 @@ class Book(models.Model):
 
 
 class ReadingList(models.Model):
-    user = models.ForeignKey(
+    name = models.CharField(max_length=255)
+    owner = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="reading_lists"
     )
-    name = models.CharField(max_length=100)
-    books = models.ManyToManyField(Book, related_name="reading_lists")
+    books = models.ManyToManyField("Book", blank=True, related_name="in_reading_lists")
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(f"{self.user.username}'s list: {self.name}")  # type: ignore
+        return str(f"{self.name}: ({self.owner.username})")  # type: ignore
 
 
 class Review(models.Model):
