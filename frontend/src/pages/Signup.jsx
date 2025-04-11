@@ -59,6 +59,34 @@ export default function Signup() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+
+        <div>
+          <label className="block text-sm font-medium">First Name</label>
+          <input
+            name="first_name"
+            value={formData.first_name}
+            onChange={handleChange}
+            className="mt-1 w-full border p-2 rounded"
+            required
+          />
+          {errors.first_name && (
+            <p className="text-sm text-red-500">{errors.first_name}</p>
+          )}
+        </div>
+        <div>
+          <label className="block text-sm font-medium">Email</label>
+          <input
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="mt-1 w-full border p-2 rounded"
+            required
+          />
+          {errors.email && (
+            <p className="text-sm text-red-500">{errors.email}</p>
+          )}
+        </div>
+
         <div>
           <label className="block text-sm font-medium">Username</label>
           <input
