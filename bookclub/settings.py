@@ -38,6 +38,11 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
 ]
 
+SESSION_COOKIE_SAMESITE = "Lax"  # or 'None' if you're using HTTPS
+SESSION_COOKIE_SECURE = False  # set to True in production with HTTPS
+
+LOGIN_REDIRECT_URL = "/dashboard/"  # or wherever you want
+
 AUTH_USER_MODEL = "core.User"
 
 # Application definition
@@ -140,9 +145,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.BasicAuthentication",  # Optional
     ],
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
+        "rest_framework.permissions.IsAuthenticated",
     ],
 }

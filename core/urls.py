@@ -9,6 +9,9 @@ from .views import (
     MeetingViewSet,
     RegisterView,
     get_csrf_token,
+    current_user,
+    custom_login_view,
+    custom_logout_view,
 )
 
 router = DefaultRouter()
@@ -24,4 +27,7 @@ urlpatterns = [
     path("", include(router.urls)),
     path("register/", RegisterView.as_view(), name="register"),
     path("csrf/", get_csrf_token),
+    path("user/", current_user),
+    path("login/", custom_login_view),
+    path("logout/", custom_logout_view),
 ]

@@ -15,6 +15,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import JsonResponse
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate, login, logout
+from django.http import JsonResponse
 
 
 class BookViewSet(viewsets.ModelViewSet):
@@ -88,3 +94,39 @@ class RegisterView(APIView):
 @ensure_csrf_cookie
 def get_csrf_token(request):
     return JsonResponse({"csrfToken": request.META.get("CSRF_COOKIE")})
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def current_user(request):
+    user = request.user
+    return Response(
+        {
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+        }
+    )
+
+
+@csrf_exempt
+def custom_login_view(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return JsonResponse({"message": "Login successful"}, status=200)
+        else:
+            return JsonResponse({"error": "Invalid credentials"}, status=401)
+    return JsonResponse({"error": "Invalid method"}, status=405)
+
+
+@csrf_exempt
+def custom_logout_view(request):
+    if request.method == "POST":
+        logout(request)
+        return JsonResponse({"message": "Logged out successfully"})
+    return JsonResponse({"error": "Invalid method"}, status=405)

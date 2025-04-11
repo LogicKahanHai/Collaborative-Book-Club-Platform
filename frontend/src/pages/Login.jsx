@@ -23,14 +23,17 @@ export default function Login() {
     try {
       const csrfToken = await getCSRFToken();
 
-      const res = await fetch('http://localhost:8000/api-auth/login/', {
+      const res = await fetch('http://localhost:8000/api/login/', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': csrfToken, // 👈 crucial
         },
         credentials: 'include',
-        body: JSON.stringify(formData),
+        body: new URLSearchParams({
+          username: formData.username,
+          password: formData.password,
+        }),
       });
 
       if (res.ok) {
@@ -39,6 +42,7 @@ export default function Login() {
         setErrors('Invalid username or password');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setErrors('Something went wrong. Try again.');
     } finally {
       setLoading(false);
