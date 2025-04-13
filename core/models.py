@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -37,28 +38,32 @@ class ReadingList(models.Model):
 
 
 class Review(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="reviews")
-    rating = models.IntegerField()
-    review = models.TextField()
+    RATING_CHOICES = [(i, str(i)) for i in range(1, 6)]  # 1 to 5
+
+    book = models.ForeignKey("Book", on_delete=models.CASCADE, related_name="reviews")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(choices=RATING_CHOICES)
+    text = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ["user", "book"]  # One review per user per book
+        unique_together = ("book", "user")  # Only one review per user per book
+        ordering = ["-created_at"]
 
     def __str__(self):
-        return str(f"{self.user.username} on {self.book.title}")  # type: ignore
+        return f"{self.user.username} rated {self.book.title} ({self.rating})"  # type: ignore
 
 
 class Discussion(models.Model):
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="discussions")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="discussions")
-    title = models.CharField(max_length=200)
-    body = models.TextField()
+    book = models.ForeignKey(
+        "Book", on_delete=models.CASCADE, related_name="discussions"
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(f"{self.title} by {self.user.username}")  # type: ignore
+        return f"{self.user.username} on {self.book.title}"  # type: ignore
 
 
 class Comment(models.Model):
@@ -74,17 +79,17 @@ class Comment(models.Model):
 
 
 class Meeting(models.Model):
-    topic = models.CharField(max_length=200)
-    book = models.ForeignKey(
-        Book, on_delete=models.SET_NULL, null=True, blank=True, related_name="meetings"
+    book = models.ForeignKey("Book", on_delete=models.CASCADE, null=True, blank=True)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    date = models.DateTimeField()
+    created_by = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, blank=True
     )
-    organizer = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="organized_meetings"
-    )
-    participants = models.ManyToManyField(
-        User, related_name="meetings_joined", blank=True
-    )
-    scheduled_for = models.DateTimeField()
+    participants = models.ManyToManyField(User, related_name="meetings")
 
     def __str__(self):
-        return str(f"{self.topic} on {self.scheduled_for.strftime('%Y-%m-%d %H:%M')}")  # type: ignore
+        return f"Meeting for {self.book.title} on {self.date}"  # type: ignore
+
+    def is_past(self):
+        return self.date < timezone.now()

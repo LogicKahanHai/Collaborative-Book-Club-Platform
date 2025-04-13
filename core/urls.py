@@ -2,6 +2,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     BookViewSet,
+    MeetingDetailView,
+    MeetingListCreateView,
     ReadingListViewSet,
     ReviewViewSet,
     DiscussionViewSet,
@@ -16,9 +18,9 @@ from .views import (
 
 router = DefaultRouter()
 router.register("books", BookViewSet)
-router.register("reading-lists", ReadingListViewSet)
-router.register("reviews", ReviewViewSet)
-router.register("discussions", DiscussionViewSet)
+router.register(r"reading-lists", ReadingListViewSet)
+router.register(r"reviews", ReviewViewSet, basename="review")
+router.register(r"discussions", DiscussionViewSet)
 router.register("comments", CommentViewSet)
 router.register("meetings", MeetingViewSet)
 
@@ -30,4 +32,6 @@ urlpatterns = [
     path("user/", current_user),
     path("login/", custom_login_view),
     path("logout/", custom_logout_view),
+    path("meetings/", MeetingListCreateView.as_view(), name="meeting-list-create"),
+    path("meetings/<int:pk>/", MeetingDetailView.as_view(), name="meeting-detail"),
 ]

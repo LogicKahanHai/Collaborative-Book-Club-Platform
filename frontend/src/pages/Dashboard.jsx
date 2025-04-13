@@ -47,17 +47,19 @@ export default function Dashboard() {
   if (loading) return <p className="text-center mt-10">Loading...</p>;
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-xl shadow">
-      <h1 className="text-2xl font-bold mb-4">Welcome, {user?.username} 👋</h1>
+    <>
+      <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-xl shadow">
+        <h1 className="text-2xl font-bold mb-4">Welcome, {user?.username} 👋</h1>
 
-      <p className="mb-4">Email: {user?.email}</p>
+        <p className="mb-4">Email: {user?.email}</p>
 
-      <button
-        onClick={handleLogout}
-        className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded"
-      >
-        Logout
-      </button>
-    </div>
+        <button
+          onClick={handleLogout}
+          className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded"
+        >
+          Logout
+        </button>
+      </div>
+    </>
   );
 }

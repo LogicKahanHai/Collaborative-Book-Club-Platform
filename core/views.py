@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, generics
 from .models import Book, ReadingList, Review, Discussion, Comment, Meeting
 from .serializers import (
     BookSerializer,
@@ -17,10 +17,8 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login, logout
-from django.http import JsonResponse
 
 
 class BookViewSet(viewsets.ModelViewSet):
@@ -32,28 +30,37 @@ class BookViewSet(viewsets.ModelViewSet):
         serializer.save(added_by=self.request.user)
 
 
+class IsOwner(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.owner == request.user
+
+
 class ReadingListViewSet(viewsets.ModelViewSet):
     queryset = ReadingList.objects.all()  # type: ignore
     serializer_class = ReadingListSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+
+    def get_queryset(self):
+        return ReadingList.objects.filter(owner=self.request.user)  # type: ignore
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save(owner=self.request.user)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    queryset = Review.objects.all()  # type: ignore
     serializer_class = ReviewSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Review.objects.all()  # type: ignore
 
     def perform_create(self, serializer):
+        # Attach current user automatically
         serializer.save(user=self.request.user)
 
 
 class DiscussionViewSet(viewsets.ModelViewSet):
-    queryset = Discussion.objects.all()  # type: ignore
     serializer_class = DiscussionSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    queryset = Discussion.objects.all()  # type: ignore
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -75,6 +82,22 @@ class MeetingViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(organizer=self.request.user)
+
+
+class MeetingListCreateView(generics.ListCreateAPIView):
+    queryset = Meeting.objects.all()  # type: ignore
+    serializer_class = MeetingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        # Automatically set the user creating the meeting
+        serializer.save(created_by=self.request.user)
+
+
+class MeetingDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Meeting.objects.all()  # type: ignore
+    serializer_class = MeetingSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class RegisterView(APIView):
