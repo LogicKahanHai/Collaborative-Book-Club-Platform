@@ -5,6 +5,7 @@ import { getCSRFToken } from '../utils/csrfToken';
 export default function MeetingDetail() {
   const [meeting, setMeeting] = useState(null);
   const [hasRSVPed, setHasRSVPed] = useState(false);
+  const [user, setUser] = useState(null);
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -16,17 +17,57 @@ export default function MeetingDetail() {
 
       if (res.ok) {
         const data = await res.json();
+        console.log(data)
         setMeeting(data);
-        setHasRSVPed(data.participants.includes(data.created_by));
+        fetchUser().then((userLog => {
+          if (userLog.id && data) {
+            setHasRSVPed(meeting.participants.includes(userLog.id));
+          }
+        }));
       } else {
         navigate('/login'); // Not logged in, redirect to login
       }
     }
 
+    async function fetchUser() {
+      const res = await fetch('http://localhost:8000/api/user/', {
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        return await res.json();
+      }
+    }
+
     fetchMeeting();
+
+
   }, [id, navigate]);
 
   const handleRSVP = async () => {
+
+    if (!meeting) return;
+
+    const participants = meeting.participants || [];
+
+    const userRes = await fetch('http://localhost:8000/api/user/', {
+      credentials: 'include',
+    });
+
+    let data
+    if (userRes.ok) {
+      data = await userRes.json();
+    }
+
+    if (hasRSVPed) {
+      console.log('Removing user from participants');
+      participants.splice(participants.indexOf(data.id), 1);
+    } else {
+
+      console.log('Adding user to participants', data);
+      participants.push(data.id);
+    }
+
     const res = await fetch(`http://localhost:8000/api/meetings/${id}/`, {
       method: hasRSVPed ? 'DELETE' : 'PATCH',
       headers: {
@@ -35,7 +76,7 @@ export default function MeetingDetail() {
       },
       credentials: 'include',
       body: JSON.stringify({
-        participants: hasRSVPed ? [] : [/* current user ID */],
+        participants: participants,
       }),
     });
 

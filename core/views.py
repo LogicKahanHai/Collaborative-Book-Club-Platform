@@ -78,10 +78,10 @@ class CommentViewSet(viewsets.ModelViewSet):
 class MeetingViewSet(viewsets.ModelViewSet):
     queryset = Meeting.objects.all()  # type: ignore
     serializer_class = MeetingSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(organizer=self.request.user)
+        serializer.save()
 
 
 class MeetingListCreateView(generics.ListCreateAPIView):
@@ -125,6 +125,7 @@ def current_user(request):
     user = request.user
     return Response(
         {
+            "id": user.id,
             "username": user.username,
             "email": user.email,
             "first_name": user.first_name,

@@ -6,18 +6,22 @@ export default function CreateMeeting() {
   const navigate = useNavigate();
 
   const [books, setBooks] = useState([]);
+  const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     date: '',
     book: '',
+    meetingLink: '',
   });
 
   // Fetch books for dropdown
   useEffect(() => {
+    console.log('Fetching books...');
     fetch('http://localhost:8000/api/books/', { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => setBooks(data));
+
   }, []);
 
   const handleChange = (e) => {
@@ -28,6 +32,18 @@ export default function CreateMeeting() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+
+    fetch('http://localhost:8000/api/user/', { credentials: 'include' }).then((res) => {
+      if (res.ok) {
+        console.log('User is logged in');
+        return res.json();
+      } else {
+        navigate('/login'); // Not logged in, redirect to login
+      }
+    }).then((data) => {
+      setUser(data);
+    })
+
     const res = await fetch('http://localhost:8000/api/meetings/', {
       method: 'POST',
       headers: {
@@ -35,7 +51,7 @@ export default function CreateMeeting() {
         'X-CSRFToken': getCSRFToken(),
       },
       credentials: 'include',
-      body: JSON.stringify(formData),
+      body: JSON.stringify({ ...formData, participants: [], created_by_id: user.id }),
     });
 
     if (res.ok) {
@@ -52,6 +68,8 @@ export default function CreateMeeting() {
     <div className="max-w-2xl mx-auto mt-10 bg-white p-8 rounded-lg shadow-lg">
       <h1 className="text-2xl font-semibold mb-6">📅 Create a New Meeting</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
+
+        {/* <input type="hidden" name="creadted_by_id" value={user.id} /> */}
 
         <div>
           <label className="block font-medium mb-1">Title</label>
@@ -105,6 +123,17 @@ export default function CreateMeeting() {
               </option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <label className="block font-medium mb-1">Meeting Link (optional)</label>
+          <input
+            type="url"
+            name="meeting_link"
+            className="w-full border border-gray-300 p-2 rounded"
+            value={formData.meetingLink}
+            onChange={handleChange}
+          />
         </div>
 
         <div className="flex justify-end">

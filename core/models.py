@@ -87,6 +87,7 @@ class Meeting(models.Model):
         User, on_delete=models.CASCADE, null=True, blank=True
     )
     participants = models.ManyToManyField(User, related_name="meetings")
+    meeting_link = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return f"Meeting for {self.book.title} on {self.date}"  # type: ignore

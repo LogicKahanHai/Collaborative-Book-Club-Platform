@@ -71,14 +71,18 @@ class MeetingSerializer(serializers.ModelSerializer):
             "date",
             "created_by",
             "participants",
+            "meeting_link",
         ]
 
     def create(self, validated_data):
+        print(validated_data)
         participants_data = validated_data.pop("participants", [])
         meeting = Meeting.objects.create(**validated_data)  # type: ignore
         if self.context["request"].user not in participants_data:
             participants_data.append(self.context["request"].user)
         meeting.participants.set(participants_data)
+        meeting.created_by = self.context["request"].user
+        meeting.save()
         return meeting
 
 

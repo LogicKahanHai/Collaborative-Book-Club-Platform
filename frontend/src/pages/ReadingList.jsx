@@ -29,7 +29,7 @@ export default function ReadingLists() {
         'Content-Type': 'application/json',
         'X-CSRFToken': getCookie('csrftoken'),
       },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, books: [] }),
     });
 
     if (res.ok) {

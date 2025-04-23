@@ -11,5 +11,11 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
+        print(obj.created_by, request.user)
+
         # Write permissions only for the owner
-        return obj.user == request.user or obj.organizer == request.user
+        return (
+            obj.created_by == request.user
+            or obj.user == request.user
+            or obj.organizer == request.user
+        )

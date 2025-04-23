@@ -50,10 +50,10 @@ export default function MeetingList() {
   return (
     <div className="container mx-auto mt-10 p-6">
       <h1 className="text-3xl font-semibold mb-6 text-center">Upcoming Book Club Meetings</h1>
-      <Link to='/meetings/create' className="mb-6 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow-md">
+      <Link to='/meetings/create' className="mb-6 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow-md mb-4">
         Create New Meeting
       </Link>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
         {meetings.map((meeting) => (
           <div key={meeting.id} className="bg-white p-4 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
             <h3 className="text-xl font-semibold text-blue-600">{meeting.title}</h3>

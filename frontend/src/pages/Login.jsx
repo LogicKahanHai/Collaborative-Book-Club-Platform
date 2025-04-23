@@ -37,7 +37,8 @@ export default function Login() {
       });
 
       if (res.ok) {
-        navigate('/dashboard');
+        navigate('/');
+        window.location.reload();
       } else {
         setErrors('Invalid username or password');
       }

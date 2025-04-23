@@ -22,7 +22,7 @@ router.register(r"reading-lists", ReadingListViewSet)
 router.register(r"reviews", ReviewViewSet, basename="review")
 router.register(r"discussions", DiscussionViewSet)
 router.register("comments", CommentViewSet)
-router.register("meetings", MeetingViewSet)
+router.register(r"meetings", MeetingViewSet)
 
 
 urlpatterns = [
